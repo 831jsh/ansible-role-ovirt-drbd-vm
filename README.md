@@ -66,7 +66,8 @@ Example Inventory
     host4
     host5
 
-    [hosts:vars]
+groupvars/hosts.yml:
+    ---
     ovirt_vm:
       name: oVirt
       uuid: 1b1d9643-6823-4ebc-9ac7-9dd540ced0fc
