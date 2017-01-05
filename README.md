@@ -68,7 +68,7 @@ Example Inventory
     host4
     host5
 
-groupvars/hosts.yml:
+group_vars/hosts.yml:
 
     ---
     ovirt_vm:
