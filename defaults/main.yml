@@ -1,0 +1,10 @@
+---
+ovirt_cluster_group: hosts
+ovirt_cluster_drbd_hosts: >
+  {% for host in groups[ovirt_cluster_group] %}
+  {% if hostvars[host].ovirt_cluster_nodeid is defined %}
+  {% if hostvars[host].ovirt_cluster_drbd_disk is defined %}
+  {{ hostvars[host].ansible_nodename }}
+  {% endif %}
+  {% endif %}
+  {% endfor %}

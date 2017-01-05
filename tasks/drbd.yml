@@ -1,0 +1,36 @@
+---
+- name: Install DRBD Wrapper
+  copy: >
+    src=drbdadm.wrapper.sh
+    dest=/usr/local/sbin/drbdadm
+    mode=0755 owner=root group=root
+
+- name: Disable drbd usage-count
+  lineinfile: >
+    dest=/etc/drbd.d/global_common.conf
+    line="	usage-count no;"
+    regexp="usage-count.*;"
+    insertafter="global {"
+    create=no
+
+- name: Install /etc/drbd.d/drbd0.res
+  template: >
+    src=drbd0.res.j2
+    dest=/etc/drbd.d/drbd0.res
+    backup=yes
+  when: ovirt_cluster_drbd_disk is defined
+
+- name: Initialize drbd disks
+  script: init_drbd_disk.sh drbd0 {{ ovirt_cluster_drbd_disk }}
+  when: ovirt_cluster_drbd_disk is defined
+  register: init_drbd_disk
+  failed_when: init_drbd_disk.rc != 0 and init_drbd_disk.rc != 2
+  changed_when: init_drbd_disk.rc == 0
+
+- name: Start DRBD Cluster
+  script: start_drbd_cluster.sh {{ ovirt_cluster_drbd_hosts }}
+  register: start_drbd_cluster
+  failed_when: start_drbd_cluster.rc != 0 and start_drbd_cluster.rc != 2
+  changed_when: init_drbd_disk.rc == 0
+  when: ovirt_cluster_nodeid is defined
+  run_once: yes

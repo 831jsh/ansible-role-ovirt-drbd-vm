@@ -1,0 +1,51 @@
+---
+- name: Update /etc/hosts
+  lineinfile: >
+    dest=/etc/hosts
+    line="{{ hostvars[item].ansible_default_ipv4.address }} {{ hostvars[item].ansible_nodename }}"
+    regexp="^{{ hostvars[item].ansible_default_ipv4.address | regex_replace('[.]','\\\\.') }} "
+  when: hostvars[item].ovirt_cluster_nodeid is defined
+  with_items: "{{groups[ovirt_cluster_group]}}"
+
+- name: Create /etc/corosync/corosync.conf
+  template: >
+    src=corosync.conf.j2
+    dest=/etc/corosync/corosync.conf
+    mode=0644 owner=root group=root
+    backup=yes
+  register: create_etc_corosync_corosync_conf
+
+- name: Reload corosync
+  shell: pcs cluster reload corosync
+  when: create_etc_corosync_corosync_conf|changed
+  failed_when: false
+- name: Start corosync/pacemaker
+  service: name={{item}} enabled=yes state=started
+  with_items:
+    - corosync
+    - pacemaker
+
+- name: Waiting for cluster
+  wait_for: >
+    path=/var/lib/pacemaker/cib/cib.xml
+    search_regex="value=\"oVirt\""
+
+- name: Check STONITH
+  shell: pcs property --all | awk '$1=="stonith-enabled:"{print $2}'
+  changed_when: false
+  register: check_stonith
+  run_once: true
+- name: Disable STONITH
+  shell: pcs property set stonith-enabled=false
+  when: check_stonith.stdout != 'false'
+  run_once: true
+
+- name: Check symmetric-cluster
+  shell: pcs property --all | awk '$1=="symmetric-cluster:"{print $2}'
+  changed_when: false
+  register: check_symmetric_cluster
+  run_once: true
+- name: Disable symmetric-cluster
+  shell: pcs property set symmetric-cluster=false
+  when: check_symmetric_cluster.stdout != 'false'
+  run_once: true

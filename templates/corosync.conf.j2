@@ -1,0 +1,30 @@
+totem {
+    version: 2
+    secauth: off
+    cluster_name: oVirt
+    transport: udpu
+}
+
+{% set hosts = [] %}
+nodelist {
+{% for host in groups[ovirt_cluster_group] %}
+{% if hostvars[host].ovirt_cluster_nodeid is defined %}
+{% set _ = hosts.append(host) %}
+    node {
+        ring0_addr: {{ hostvars[host].ansible_nodename }}
+        nodeid: {{ hostvars[host].ovirt_cluster_nodeid }}
+    }
+{% endif %}
+{% endfor %}
+}
+
+quorum {
+    provider: corosync_votequorum
+{% if hosts|length == 2 %}
+    two_node: 1
+{% endif %}
+}
+
+logging {
+    to_syslog: yes
+}

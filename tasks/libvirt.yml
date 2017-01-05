@@ -1,0 +1,9 @@
+---
+- name: Start libvirtd
+  service: name=libvirtd enabled=yes state=started
+
+- name: Setup virsh password
+  script: setup_virsh_passwd.sh
+  register: setup_virsh_passwd
+  failed_when: "setup_virsh_passwd.rc == 1"
+  changed_when: "setup_virsh_passwd.rc == 2"

@@ -1,0 +1,25 @@
+resource drbd0 {
+    device /dev/drbd0;
+    net {
+	protocol C;
+	data-integrity-alg crc32c;
+	after-sb-0pri discard-zero-changes;
+	after-sb-1pri discard-secondary;
+	after-sb-2pri disconnect;
+    }
+    syncer {
+	rate 50M;
+	verify-alg crc32c;
+    }
+{% for host in groups[ovirt_cluster_group] %}
+{% if hostvars[host].ovirt_cluster_nodeid is defined %}
+{% if hostvars[host].ovirt_cluster_drbd_disk is defined %}
+    on {{ hostvars[host].ansible_fqdn }} {
+	disk {{ hostvars[host].ovirt_cluster_drbd_disk }};
+	meta-disk internal;
+	address {{ hostvars[host].ansible_default_ipv4.address }}:7789;
+    }
+{% endif %}
+{% endif %}
+{% endfor %}
+}

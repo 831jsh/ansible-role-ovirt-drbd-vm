@@ -1,0 +1,31 @@
+---
+- name: Install required packages
+  yum: name={{item}} state=installed
+  with_items:
+    - libvirt
+    - pcs
+    - drbd84-utils
+    - kmod-drbd84
+  when: ovirt_cluster_nodeid is defined
+  tags:
+    - packages
+
+- include: pacemaker.yml
+  when: ovirt_cluster_nodeid is defined
+  tags: pacemaker
+
+- include: network.yml
+  when: ovirt_cluster_nodeid is defined
+  tags: network
+
+- include: libvirt.yml
+  when: ovirt_cluster_nodeid is defined
+  tags: libvirt
+
+- include: drbd.yml
+  when: ovirt_cluster_nodeid is defined
+  tags: drbd
+
+- include: vm.yml
+  when: ovirt_cluster_nodeid is defined
+  tags: vm

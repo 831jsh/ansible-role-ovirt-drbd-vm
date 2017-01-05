@@ -1,0 +1,39 @@
+---
+- name: Create /etc/oVirt.xml
+  template: >
+    src=oVirt.xml.j2
+    dest=/etc/oVirt.xml
+    mode=0400 owner=qemu group=root
+- name: Create oVirt disk
+  script: >
+    create_ovirt_disk.sh
+    -s '{{ ovirt_vm.swap }}'
+    -n '{{ ovirt_vm.hostname }}'
+    -i '{{ ovirt_vm.ipaddr }}'
+    {% if ovirt_vm.netmask is defined %}
+    -m '{{ ovirt_vm.netmask }}'
+    {% endif %}
+    {% if ovirt_vm.gateway is defined %}
+    -g '{{ ovirt_vm.gateway }}'
+    {% endif %}
+    {% if ovirt_vm.resolvers is defined %}
+    -r '{{ ovirt_vm.resolvers }}'
+    {% endif %}
+    {% if ovirt_vm.password is defined %}
+    -p "{{ ovirt_vm.password | regex_replace('[$]','\\$') }}"
+    {% endif %}
+  register: create_ovirt_disk
+  failed_when: create_ovirt_disk.rc != 0 and create_ovirt_disk.rc != 2
+  changed_when: create_ovirt_disk.rc == 0
+  when: ovirt_cluster_drbd_disk is defined
+
+- name: Add user qemu to group disk
+  user: name=qemu groups=disk append=yes
+
+- name: Start oVirtVM
+  script: start_ovirt_vm.sh {{ ovirt_cluster_drbd_hosts }}
+  register: start_ovirt_vm
+  failed_when: start_ovirt_vm.rc != 0 and start_ovirt_vm.rc != 2
+  changed_when: start_ovirt_vm.rc == 0
+  when: ovirt_cluster_nodeid is defined
+  run_once: yes

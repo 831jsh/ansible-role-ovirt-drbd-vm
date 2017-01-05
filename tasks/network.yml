@@ -1,0 +1,6 @@
+---
+- name: Setup bridge
+  script: setup_bridge.sh "{{ ovirt_vm.bridge }}"
+  register: setup_bridge
+  failed_when: setup_bridge.rc != 0 and setup_bridge.rc != 2
+  changed_when: setup_bridge.rc == 0
