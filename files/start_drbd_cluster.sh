@@ -13,7 +13,7 @@ if ! pcs -f $TF resource show oVirtVolume >/dev/null 2>&1; then
 fi
 
 if ! pcs -f $TF resource show oVirtMasterVolume >/dev/null 2>&1; then
-    pcs -f $TF resource master oVirtMasterVolume oVirtVolume master-max=1 master-node-max=1 clone-max=2 clone-node-max=2 notify=true
+    pcs -f $TF resource master oVirtMasterVolume oVirtVolume master-max=1 master-node-max=1 clone-max=2 clone-node-max=1 notify=true
     RESULT=0
 fi
 
