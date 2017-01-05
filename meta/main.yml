@@ -1,17 +1,16 @@
 ---
 galaxy_info:
   author: thepax
-  description: 
+  description: Setups highly available oVirt VM
   license: GPLv3
   min_ansible_version: 1.9
   platforms:
   - name: EL
     versions:
     - 7
-  categories:
-  - system
   galaxy_tags:
   - ovirt
+  - system
 dependencies:
   - thepax.elrepo
   - thepax.qemu-ev
