@@ -2,10 +2,10 @@ ovirt-drbd-vm
 =============
 
 This role does the following things:
-# Setups Pacemaker cluster
-# Creates DRBD device
-# Creates high available VM
-# Installs latest CentOS 7 into VM
+* Setups Pacemaker cluster
+* Creates DRBD device
+* Creates high available VM
+* Installs latest CentOS 7 into VM
 
 Note: There is no VNC/SPICE configured. VM console can be accessed via `virsh console {{ovirt_vm.name}}`
 
@@ -14,9 +14,7 @@ Status of running cluster: `pcs status`
 Requirements
 ------------
 
-Each host in cluster should have unique ovirt_cluster_nodeid defined.
-Hosts with no ovirt_cluster_nodeid defined will not be included in Pacemaker cluster.
-Two hosts in cluster should have ovirt_cluster_drbd_disk defined to local path to DRBD backing disk/partition.
+A couple hosts in the cluster should have local disks/partitions for DRBD backing storage.
 
 Role Variables
 --------------
@@ -39,6 +37,10 @@ Role Variables
       resolvers: 8.8.8.8,8.8.8.4
       mac: 52:54:00:d8:b0:a3
       password: "$1$5rCfy/eR$GtZpNpbFAzc5NiGfQ96mC."
+
+Each host in cluster should have unique `ovirt_cluster_nodeid` defined.
+Hosts with no `ovirt_cluster_nodeid` defined will not be included in Pacemaker cluster.
+Two hosts in cluster should have `ovirt_cluster_drbd_disk` defined to local path to DRBD backing disk/partition.
 
 Dependencies
 ------------
